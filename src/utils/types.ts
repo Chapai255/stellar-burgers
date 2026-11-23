@@ -51,3 +51,9 @@ export type TFeedState = {
   isLoading: boolean;
   error: unknown;
 };
+
+export type TIngredientsState = {
+  items: TIngredient[];
+  isLoading: boolean;
+  error: string | null;
+};

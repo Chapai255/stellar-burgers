@@ -1,10 +1,13 @@
+import { selectIngredients } from '@selectors';
 import { Preloader, OrderInfoUI } from '@ui';
 import { useMemo } from 'react';
+
+import { useSelector } from '@services/store';
 
 import type { TIngredient } from '@utils-types';
 
 export const OrderInfo = (): React.JSX.Element => {
-  /** TODO: взять переменные orderData и ingredients из стора */
+  /** TODO: взять orderData из стора */
   const orderData = {
     createdAt: '',
     ingredients: [],
@@ -15,7 +18,7 @@ export const OrderInfo = (): React.JSX.Element => {
     number: 0,
   };
 
-  const ingredients: TIngredient[] = [];
+  const ingredients = useSelector(selectIngredients);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
