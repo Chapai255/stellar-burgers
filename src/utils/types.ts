@@ -1,3 +1,5 @@
+import type { Location } from 'react-router-dom';
+
 export type TIngredient = {
   _id: string;
   name: string;
@@ -51,3 +53,33 @@ export type TFeedState = {
   isLoading: boolean;
   error: unknown;
 };
+
+export type TIngredientsState = {
+  items: TIngredient[];
+  isLoading: boolean;
+  error: string | null;
+};
+
+export type TUserState = {
+  user: TUser | null;
+  isAuthChecked: boolean;
+};
+
+export type TOrderState = {
+  orderRequest: boolean;
+  orderModalData: TOrder | null;
+  currentOrder: TOrder | null;
+};
+
+export type TProfileOrdersState = {
+  orders: TOrder[];
+  isLoading: boolean;
+  error: string | null;
+};
+
+/* Что ссылки и редиректы кладут в location.state: страница, поверх которой
+   показано модальное окно, и страница, с которой отправили на авторизацию. */
+export type TLocationState = {
+  background?: Location;
+  from?: Location;
+} | null;

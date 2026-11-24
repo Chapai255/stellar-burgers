@@ -1,9 +1,12 @@
-import { forgotPasswordApi } from '@api';
+import { forgotPassword } from '@slices';
 import { ForgotPasswordUI } from '@ui-pages';
 import { useState, type SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useDispatch } from '@services/store';
+
 export const ForgotPassword = (): React.JSX.Element => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<Error | null>(null);
 
@@ -13,7 +16,8 @@ export const ForgotPassword = (): React.JSX.Element => {
     e.preventDefault();
 
     setError(null);
-    void forgotPasswordApi({ email })
+    void dispatch(forgotPassword(email))
+      .unwrap()
       .then(() => {
         localStorage.setItem('resetPassword', 'true');
         void navigate('/reset-password', { replace: true });

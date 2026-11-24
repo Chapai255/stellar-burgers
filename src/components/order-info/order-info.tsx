@@ -1,21 +1,34 @@
+import { selectIngredients, selectOrderByNumber } from '@selectors';
+import { fetchOrderByNumber } from '@slices';
 import { Preloader, OrderInfoUI } from '@ui';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+import { useDispatch, useSelector } from '@services/store';
 
 import type { TIngredient } from '@utils-types';
 
 export const OrderInfo = (): React.JSX.Element => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0,
-  };
+  const dispatch = useDispatch();
+  const { number } = useParams<{ number: string }>();
+  const orderNumber = Number(number);
+  const orderData = useSelector((state) => selectOrderByNumber(state, orderNumber));
+  const ingredients = useSelector(selectIngredients);
+  const [error, setError] = useState('');
 
-  const ingredients: TIngredient[] = [];
+  /* Если пришли по прямой ссылке, заказа ещё нет в сторе: запрашиваем по номеру. */
+  useEffect(() => {
+    if (orderData) return;
+
+    if (!Number.isInteger(orderNumber)) {
+      setError('Заказ не найден');
+      return;
+    }
+
+    void dispatch(fetchOrderByNumber(orderNumber))
+      .unwrap()
+      .catch((err: Error) => setError(err.message));
+  }, [dispatch, orderData, orderNumber]);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
@@ -56,6 +69,10 @@ export const OrderInfo = (): React.JSX.Element => {
       total,
     };
   }, [orderData, ingredients]);
+
+  if (error && !orderData) {
+    return <p className="text text_type_main-default">{error}</p>;
+  }
 
   if (!orderInfo) {
     return <Preloader />;
