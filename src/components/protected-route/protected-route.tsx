@@ -1,15 +1,34 @@
-import type { TProtectedRouteProps } from './type';
+import { selectIsAuthChecked, selectUser } from '@selectors';
+import { Preloader } from '@ui';
+import { Navigate, useLocation } from 'react-router-dom';
 
-/**
- * Каркас защищённого маршрута. Пока проверки авторизации нет, он просто
- * отдаёт вложенный компонент, чтобы все страницы были доступны по URL.
- *
- * TODO (шаг 2): взять из стора пользователя и признак «проверка авторизации
- * завершена», затем добавить:
- *  - пока проверка не завершена — показывать <Preloader />;
- *  - `onlyUnAuth` и пользователь авторизован — <Navigate> на `state.from` или `/`;
- *  - нет `onlyUnAuth` и пользователь не авторизован — <Navigate> на `/login`
- *    с `state={{ from: location }}`.
- */
-export const ProtectedRoute = ({ children }: TProtectedRouteProps): React.JSX.Element =>
-  children;
+import { useSelector } from '@services/store';
+
+import type { TProtectedRouteProps } from './type';
+import type { TLocationState } from '@utils-types';
+
+export const ProtectedRoute = ({
+  onlyUnAuth = false,
+  children,
+}: TProtectedRouteProps): React.JSX.Element => {
+  const location = useLocation();
+  const user = useSelector(selectUser);
+  const isAuthChecked = useSelector(selectIsAuthChecked);
+
+  if (!isAuthChecked) {
+    return <Preloader />;
+  }
+
+  /* Вход, регистрация и сброс пароля не нужны уже залогиненному пользователю:
+     возвращаем его туда, откуда его отправили на /login, или на главную. */
+  if (onlyUnAuth && user) {
+    const from = (location.state as TLocationState)?.from ?? { pathname: '/' };
+    return <Navigate to={from} replace />;
+  }
+
+  if (!onlyUnAuth && !user) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return children;
+};

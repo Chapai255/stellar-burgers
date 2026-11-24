@@ -16,22 +16,22 @@ import {
   Register,
   ResetPassword,
 } from '@pages';
-import { fetchIngredients } from '@slices';
+import { checkUserAuth, fetchIngredients } from '@slices';
+import clsx from 'clsx';
 import { useCallback, useEffect } from 'react';
 import { Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { useDispatch } from '@services/store';
 
 import type { TDetailPageProps } from './type';
-import type { Location } from 'react-router-dom';
+import type { TLocationState } from '@utils-types';
 
 import '../../index.css';
 
 import styles from './app.module.css';
 
-/* Если пользователь пришёл на маршрут кликом по ингредиенту или заказу, ссылка
-   кладёт в state страницу, поверх которой нужно показать модальное окно. */
-type TLocationState = { background?: Location } | null;
+const ORDER_NUMBER_LENGTH = 6;
+const ORDER_NUMBER_PADDING = '0';
 
 const useCloseModal = (): (() => void) => {
   const navigate = useNavigate();
@@ -44,13 +44,13 @@ const useCloseModal = (): (() => void) => {
 const useOrderTitle = (): string => {
   const { number } = useParams<{ number: string }>();
 
-  return number ? `#${number.padStart(6, '0')}` : '';
+  return number ? `#${number.padStart(ORDER_NUMBER_LENGTH, ORDER_NUMBER_PADDING)}` : '';
 };
 
 /* Страница с подробностями при прямом заходе по адресу (без модального окна). */
 const DetailPage = ({ title, children }: TDetailPageProps): React.JSX.Element => (
   <div className={styles.detailPageWrap}>
-    <h1 className={`${styles.detailHeader} text text_type_main-large`}>{title}</h1>
+    <h1 className={clsx(styles.detailHeader, 'text text_type_main-large')}>{title}</h1>
     {children}
   </div>
 );
@@ -98,6 +98,7 @@ const App = (): React.JSX.Element => {
   const background = (location.state as TLocationState)?.background;
 
   useEffect(() => {
+    void dispatch(checkUserAuth());
     void dispatch(fetchIngredients());
   }, [dispatch]);
 

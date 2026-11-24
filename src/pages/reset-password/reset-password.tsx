@@ -1,9 +1,12 @@
-import { resetPasswordApi } from '@api';
+import { resetPassword } from '@slices';
 import { ResetPasswordUI } from '@ui-pages';
 import { type SyntheticEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useDispatch } from '@services/store';
+
 export const ResetPassword = (): React.JSX.Element => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
@@ -13,7 +16,8 @@ export const ResetPassword = (): React.JSX.Element => {
     e.preventDefault();
 
     setError(null);
-    void resetPasswordApi({ password, token })
+    void dispatch(resetPassword({ password, token }))
+      .unwrap()
       .then(() => {
         localStorage.removeItem('resetPassword');
         void navigate('/login');
